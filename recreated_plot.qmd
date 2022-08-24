@@ -3,24 +3,24 @@ title: "Recreated Plot"
 format: html
 editor: visual
 ---
-
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+# Packages
+library(tidyverse)
+library(here)
+library(janitor)
 ```
 
-You can add options to executable code like this
-
 ```{r}
-#| echo: false
-2 * 2
-```
+# Read in the four files needed to recreate the plot
+Q1 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca1-Bisley.csv")) %>%
+  clean_names()
 
-The `echo: false` option disables the printing of code (only output is displayed).
+Q2 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca2-Bisley.csv")) %>%
+  clean_names()
+
+Q3 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca3-Bisley.csv")) %>%
+  clean_names()
+
+PRM <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "RioMameyesPuenteRoto.csv")) %>%
+  clean_names()
+```
