@@ -33,3 +33,12 @@ joined_df <- Q1 %>%
   full_join(PRM)
 ```
 
+```{r}
+# Tidy the data and begin to make it ready for our analysis
+pivot_df_k_no3 <- joined_df %>%
+  select(sample_id, sample_date, no3_n, k) %>%
+  mutate(year = lubridate::year(sample_date)) %>%
+  filter(year %in% 1989:1995) %>%
+  pivot_longer(cols = c(no3_n, k), names_to = "chemicals", values_to = "amounts")
+```
+
