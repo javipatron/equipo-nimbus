@@ -39,9 +39,17 @@ joined_df <- Q1 %>%
 pivot_df_no3_k <- joined_df %>%
   select(sample_id, sample_date, no3_n, k) %>%
   filter(lubridate::year(sample_date) %in% 1989:1995) %>%
-  pivot_longer(cols = c(no3_n, k), names_to = "chemicals", values_to = "amounts")
+  pivot_longer(cols = c(no3_n, k), names_to = "chemicals", values_to = "amounts") %>%
+  drop_na()
 ```
 
-
+```{r}
+# Plot the two chemicals of interest with colors by site
+ggplot(data = pivot_df_no3_k, aes(x = sample_date, y = amounts)) +
+  geom_line(aes(color = sample_id)) +
+  facet_wrap(~chemicals,
+             scales = "free_y",
+             ncol = 1)
+```
 
 
