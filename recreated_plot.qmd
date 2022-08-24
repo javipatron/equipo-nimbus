@@ -24,3 +24,12 @@ Q3 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "
 PRM <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "RioMameyesPuenteRoto.csv")) %>%
   clean_names()
 ```
+
+```{r}
+# Combine datasets by full join (they share all of the same columns, so columns not specified)
+joined_df <- Q1 %>%
+  full_join(Q2) %>%
+  full_join(Q3) %>%
+  full_join(PRM)
+```
+
