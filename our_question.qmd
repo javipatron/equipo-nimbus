@@ -3,9 +3,11 @@ title: "Our question!"
 format: html
 editor: visual
 ---
+## Introduction
+Here we aim to answer the question: "Does increased rainfall correlate with change in K & NO3 at Bisley measurement sites?" This report uses three different sites at Bisley: Quebrada Cuenca 1, Quebrada Cuenca 2, and Quebrada Cuenca 3, as well as rainfall data for the region, highlighting the time when Hurricane Hugo hit in 1989.
 
+## Load in the packages
 ```{r}
-# Load in packages
 library(tidyverse)
 library(here)
 library(janitor)
@@ -13,8 +15,8 @@ library(lubridate)
 library(patchwork)
 ```
 
+## Read in the four files needed to analyze the Bisley sites vs. rainfall
 ```{r}
-# Read in the four files needed to analyze the Bisley sites vs. rainfall
 Q1 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca1-Bisley.csv")) %>%
   clean_names()
 
@@ -28,32 +30,33 @@ rainfall <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-da
   clean_names()
 ```
 
+## Combine datasets by a full join
 ```{r}
 joined_df <- Q1 %>%
   full_join(Q2) %>%
   full_join(Q3)
 ```
 
+## Tidy the data and begin to make it ready for our analysis
 ```{r}
+# Chemistry dataframe
 pivot_df_no3_k <- joined_df %>%
   select(sample_id, sample_date, no3_n, k) %>% # Select only necessary columns
   filter(lubridate::year(sample_date) %in% 1989:1994) %>% # Only have data from 1989-1994
   mutate(month_date = lubridate::floor_date(sample_date, "month")) %>% # Make data from the day level to the month level
   pivot_longer(cols = c(no3_n, k), names_to = "chemicals", values_to = "amounts") # Make the two chemical names in a column and values in another
-```
 
-```{r}
+# Rainfall dataframe
 rainfall_subset <- rainfall %>%
   mutate(date = lubridate::mdy(date)) %>% # Put dates in same format as other dataframe
   select(date, rammday) %>% # Don't need throughfall column
   filter(lubridate::year(date) %in% 1989:1994) %>% # Only have data from 1989-1994
   mutate(month_date = lubridate::floor_date(date, "month"), .after = date) # Make data from the day level to the month level
-  
 ```
 
+## Add a column with the level of the data as bimonthly (every two months) rather than monthly
 ```{r}
-# Add a column to each dataset with the level of the data as bimonthly rather than monthly
-
+# For chemistry data
 pivot_df_no3_k <- pivot_df_no3_k %>%
   mutate(odd_month_date = month_date, .after = month_date) # Create a copy of the month column which will be filled with bimonthly dates
 
@@ -66,7 +69,6 @@ pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, 
 pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "12-01", "11-01")
 
 pivot_df_no3_k$odd_month_date <- as.Date(pivot_df_no3_k$odd_month_date) # Make it a Date variable again
-
 
 # For rainfall data
 rainfall_subset <- rainfall_subset %>%
@@ -83,8 +85,9 @@ rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date
 rainfall_subset$odd_month_date <- as.Date(rainfall_subset$odd_month_date) # Make it a Date variable again
 ```
 
+## Create a summary table with means by month, chemical, and site
 ```{r}
-# Summarize chemical df means by month, chemical, and site
+# Summarize chemistry df means by month, chemical, and site
 chemical_summary_df <- pivot_df_no3_k %>%
   group_by(sample_id, odd_month_date, chemicals) %>%
   summarize(chemical_means_by_month = mean(amounts, na.rm = TRUE))
@@ -95,7 +98,7 @@ rainfall_summary_df <- rainfall_subset %>%
   summarize(rainfall_means_by_month = mean(rammday, na.rm = TRUE))
 ```
 
-
+## Create a plot of the two chemicals of interest (K and NO3) with colors by site with another plot containing rainfall for the same time period
 ```{r}
 # Define positions of vline for Hugo
 chemical_date_vline <- as.Date(c("1989-09-01"))    
@@ -131,14 +134,14 @@ rainfall_plot <- ggplot(data = rainfall_summary_df, aes(x = odd_month_date,
   geom_line(color = "darkblue") +
   labs(x = "Years", y = "Bimonthly Rainfall Means (mm)") +
   theme_light() + 
-  theme(panel.grid.minor.x=element_blank(),
-        panel.grid.major.x=element_blank(), #get rid of vertical grid lines 
-        text=element_text(size=10,  family="Times New Roman")) +
-  # Add the line
   geom_vline(xintercept = as.numeric(chemical_summary_df$odd_month_date[chemical_date_vline_position]), 
              color = "dark grey",
-             linetype = "dashed")
+             linetype = "dashed") + # Add the line
+  theme(panel.grid.minor.x=element_blank(),
+        panel.grid.major.x=element_blank(), # Get rid of vertical grid lines 
+        text=element_text(size=10,  family="Times New Roman")) # Change text size and font
 
+# Create combined plot
 chemical_plot / rainfall_plot
 ```
 

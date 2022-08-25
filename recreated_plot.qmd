@@ -2,10 +2,14 @@
 title: "Recreated Plot"
 format: html
 editor: visual
+execute:
+  warning: false
 ---
+## Introduction
+Here we aim to recreate a previously-made plot of stream chemistry data related to four different sites in Puerto Rico (Quebrada Cuenca 1 - Bisley, Quebrada Cuenca 2 - Bisley, Quebrada Cuenca 3 - Bisley, and Rio Mameyes Puente Roto), highlighting the time when Hurricane Hugo hit in 1989.
 
+## Load in the packages
 ```{r}
-# Load in packages
 library(tidyverse)
 library(ggplot2)
 library(here)
@@ -13,8 +17,8 @@ library(janitor)
 library(lubridate)
 ```
 
+## Read in the four files needed to recreate the plot, cleaning the names for each one
 ```{r}
-# Read in the four files needed to recreate the plot, cleaning the names for each one
 Q1 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca1-Bisley.csv")) %>%
   clean_names()
 
@@ -24,20 +28,20 @@ Q2 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "
 Q3 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca3-Bisley.csv")) %>%
   clean_names()
 
-PRM <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "RioMameyesPuenteRoto.csv")) %>%
+MPR <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "RioMameyesPuenteRoto.csv")) %>%
   clean_names()
 ```
 
+## Combine datasets by a full join 
 ```{r}
-# Combine datasets by full join (they share all of the same columns, so columns not specified)
-joined_df <- Q1 %>%
+joined_df <- Q1 %>% # They share all of the same columns, so columns not specified
   full_join(Q2) %>%
   full_join(Q3) %>%
-  full_join(PRM)
+  full_join(MPR)
 ```
 
+## Tidy the data and begin to make it ready for our analysis
 ```{r}
-# Tidy the data and begin to make it ready for our analysis
 pivot_df_no3_k <- joined_df %>%
   select(sample_id, sample_date, no3_n, k) %>% # Select only necessary columns
   filter(lubridate::year(sample_date) %in% 1989:1995) %>% # Only have data from 1989-1995
@@ -54,9 +58,8 @@ pivot_df_no3_no_k <- pivot_df_no3_k %>%
 pivot_df_no3_k_rejoined <- full_join(pivot_df_no3_no_k, k_correct_dates) # Combine refined k data with the no3 data
 ```
 
+## Add a column with the level of the data as bimonthly (every two months) rather than monthly
 ```{r}
-# Add a column with the level of the data as bimonthly rather than monthly
-
 pivot_df_no3_k_rejoined <- pivot_df_no3_k_rejoined %>%
   mutate(odd_month_date = month_date, .after = month_date) # Create a copy of the month column which will be filled with bimonthly dates
 
@@ -71,19 +74,19 @@ pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoine
 pivot_df_no3_k_rejoined$odd_month_date <- as.Date(pivot_df_no3_k_rejoined$odd_month_date) # Make it a Date variable again
 ```
 
+## Create a summary table with means by month, chemical, and site
 ```{r}
-# Summarize means by month, chemical, and site
 summary_df <- pivot_df_no3_k_rejoined %>%
   group_by(sample_id, odd_month_date, chemicals) %>%
   summarize(means_by_month = mean(amounts, na.rm = TRUE))
 ```
-
+## Create a plot of the two chemicals of interest (K and NO3) with colors by site
 ```{r}
 # Define positions of vline for Hugo
 date_vline <- as.Date(c("1989-09-01"))    
 date_vline_position <- which(summary_df$odd_month_date %in% date_vline)
 
-# Plot the two chemicals of interest with colors by site
+# Create the plot
 ggplot(data = summary_df, aes(x = odd_month_date, 
                               y = means_by_month)) +
   geom_line(aes(color = sample_id)) +
@@ -96,11 +99,10 @@ ggplot(data = summary_df, aes(x = odd_month_date,
   scale_color_manual(values = c("darkseagreen3", "bisque3", "darkgreen", "deepskyblue3")) +
   labs(x = "Years", y = "Bimonthly Chemical Means", color = "") +
   theme_light() +
-  # Add the line
   geom_vline(xintercept = as.numeric(summary_df$odd_month_date[date_vline_position]), 
              color = "dark grey",
-             linetype = "dashed") + 
+             linetype = "dashed") + # Add the line
   theme(panel.grid.minor.x=element_blank(),
-        panel.grid.major.x=element_blank(), #get rid of vertical grid lines 
-        text=element_text(size=10,  family="Times New Roman"))
+        panel.grid.major.x=element_blank(), # Get rid of vertical grid lines 
+        text=element_text(size=10,  family="Times New Roman")) # Change text size and font
 ```
