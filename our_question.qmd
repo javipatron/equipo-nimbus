@@ -144,6 +144,16 @@ rainfall_plot <- ggplot(data = rainfall_summary_df, aes(x = odd_month_date,
         text=element_text(size=10,  family="Times New Roman")) # Change text size and font
 
 # Create combined plot
-chemical_plot / rainfall_plot
+combined_plot <- chemical_plot / rainfall_plot
+combined_plot
+```
+
+## Save the plot to the plots folder
+```{r}
+ggsave(plot = combined_plot,
+       here("plots", "rainfall_and_stream_chemistry_plot.png"),
+       width = 8,
+       height = 8,
+       dpi = 200)
 ```
 
