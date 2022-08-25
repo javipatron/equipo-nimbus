@@ -57,8 +57,7 @@ pivot_df_no3_k_rejoined <- full_join(pivot_df_no3_no_k, k_correct_dates) # Combi
 # Add a column with the level of the data as bimonthly rather than monthly
 
 pivot_df_no3_k_rejoined <- pivot_df_no3_k_rejoined %>%
-  mutate(odd_month_date = month_date) %>% # Create a copy of the month column which will be filled with bimonthly dates
-  relocate(odd_month_date, .after = month_date)
+  mutate(odd_month_date = month_date, .after = month_date) # Create a copy of the month column which will be filled with bimonthly dates
 
 # Converting to merge even months into odd months
 pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "02-01", "01-01")
