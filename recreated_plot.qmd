@@ -7,6 +7,7 @@ editor: visual
 ```{r}
 # Load in packages
 library(tidyverse)
+library(ggplot2)
 library(here)
 library(janitor)
 library(lubridate)
@@ -92,10 +93,14 @@ ggplot(data = summary_df, aes(x = odd_month_date,
              strip.position = "left", 
              labeller = as_labeller(c(k = "K mg l^-1", 
                                       no3_n = "NO3-N ug l^-1"))) +
-  labs(x = "Years", y = "", color = "") +
+  scale_color_manual(values = c("darkseagreen3", "bisque3", "darkgreen", "deepskyblue3")) +
+  labs(x = "Years", y = "Bimonthly Chemical Means", color = "") +
   theme_light() +
   # Add the line
   geom_vline(xintercept = as.numeric(summary_df$odd_month_date[date_vline_position]), 
              color = "dark grey",
-             linetype = "dashed")
+             linetype = "dashed") + 
+  theme(panel.grid.minor.x=element_blank(),
+        panel.grid.major.x=element_blank(), #get rid of vertical grid lines 
+        text=element_text(size=10,  family="Times New Roman"))
 ```

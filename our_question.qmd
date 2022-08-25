@@ -1,0 +1,144 @@
+---
+title: "Our question!"
+format: html
+editor: visual
+---
+
+```{r}
+# Load in packages
+library(tidyverse)
+library(here)
+library(janitor)
+library(lubridate)
+library(patchwork)
+```
+
+```{r}
+# Read in the four files needed to analyze the Bisley sites vs. rainfall
+Q1 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca1-Bisley.csv")) %>%
+  clean_names()
+
+Q2 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca2-Bisley.csv")) %>%
+  clean_names()
+
+Q3 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca3-Bisley.csv")) %>%
+  clean_names()
+
+rainfall <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "BisleywklyRain-Throughfall1988-2015.csv")) %>%
+  clean_names()
+```
+
+```{r}
+joined_df <- Q1 %>%
+  full_join(Q2) %>%
+  full_join(Q3)
+```
+
+```{r}
+pivot_df_no3_k <- joined_df %>%
+  select(sample_id, sample_date, no3_n, k) %>% # Select only necessary columns
+  filter(lubridate::year(sample_date) %in% 1989:1994) %>% # Only have data from 1989-1994
+  mutate(month_date = lubridate::floor_date(sample_date, "month")) %>% # Make data from the day level to the month level
+  pivot_longer(cols = c(no3_n, k), names_to = "chemicals", values_to = "amounts") # Make the two chemical names in a column and values in another
+```
+
+```{r}
+rainfall_subset <- rainfall %>%
+  mutate(date = lubridate::mdy(date)) %>% # Put dates in same format as other dataframe
+  select(date, rammday) %>% # Don't need throughfall column
+  filter(lubridate::year(date) %in% 1989:1994) %>% # Only have data from 1989-1994
+  mutate(month_date = lubridate::floor_date(date, "month"), .after = date) # Make data from the day level to the month level
+  
+```
+
+```{r}
+# Add a column to each dataset with the level of the data as bimonthly rather than monthly
+
+pivot_df_no3_k <- pivot_df_no3_k %>%
+  mutate(odd_month_date = month_date, .after = month_date) # Create a copy of the month column which will be filled with bimonthly dates
+
+# Converting to merge even months into odd months
+pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "02-01", "01-01")
+pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "04-01", "03-01")
+pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "06-01", "05-01")
+pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "08-01", "07-01")
+pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "10-01", "09-01")
+pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "12-01", "11-01")
+
+pivot_df_no3_k$odd_month_date <- as.Date(pivot_df_no3_k$odd_month_date) # Make it a Date variable again
+
+
+# For rainfall data
+rainfall_subset <- rainfall_subset %>%
+  mutate(odd_month_date = month_date, .after = month_date) # Create a copy of the month column which will be filled with bimonthly dates
+
+# Converting to merge even months into odd months
+rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "02-01", "01-01")
+rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "04-01", "03-01")
+rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "06-01", "05-01")
+rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "08-01", "07-01")
+rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "10-01", "09-01")
+rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "12-01", "11-01")
+
+rainfall_subset$odd_month_date <- as.Date(rainfall_subset$odd_month_date) # Make it a Date variable again
+```
+
+```{r}
+# Summarize chemical df means by month, chemical, and site
+chemical_summary_df <- pivot_df_no3_k %>%
+  group_by(sample_id, odd_month_date, chemicals) %>%
+  summarize(chemical_means_by_month = mean(amounts, na.rm = TRUE))
+
+# Summarize rainfall df means by month
+rainfall_summary_df <- rainfall_subset %>%
+  group_by(odd_month_date) %>%
+  summarize(rainfall_means_by_month = mean(rammday, na.rm = TRUE))
+```
+
+
+```{r}
+# Define positions of vline for Hugo
+chemical_date_vline <- as.Date(c("1989-09-01"))    
+chemical_date_vline_position <- which(chemical_summary_df$odd_month_date %in% chemical_date_vline)
+
+rainfall_date_vline <- as.Date(c("1989-09-01"))    
+rainfall_vline_position <- which(rainfall_summary_df$odd_month_date %in% rainfall_date_vline)
+
+# Plot the two chemicals of interest with colors by site
+chemical_plot <- ggplot(data = chemical_summary_df, aes(x = odd_month_date, 
+                              y = chemical_means_by_month)) +
+  geom_line(aes(color = sample_id)) +
+  facet_wrap(~chemicals,
+             scales = "free_y",
+             ncol = 1,
+             strip.position = "left", 
+             labeller = as_labeller(c(k = "K mg l^-1", 
+                                      no3_n = "NO3-N ug l^-1"))) +
+  scale_color_manual(values = c("darkslategray3", "darkslategray4", "darkslategray")) +
+  labs(x = "", y = "Bimonthly Chemical Means", color = "") +
+  theme_light() +
+  theme(panel.grid.minor.x=element_blank(),
+        panel.grid.major.x=element_blank(), #get rid of vertical grid lines 
+        text=element_text(size=10,  family="Times New Roman")) +
+  # Add the line
+  geom_vline(xintercept = as.numeric(chemical_summary_df$odd_month_date[chemical_date_vline_position]), 
+             color = "dark grey",
+             linetype = "dashed")
+
+# Plot rainfall
+rainfall_plot <- ggplot(data = rainfall_summary_df, aes(x = odd_month_date, 
+                              y = rainfall_means_by_month)) +
+  geom_line(color = "darkblue") +
+  labs(x = "Years", y = "Bimonthly Rainfall Means (mm)") +
+  theme_light() + 
+  theme(panel.grid.minor.x=element_blank(),
+        panel.grid.major.x=element_blank(), #get rid of vertical grid lines 
+        text=element_text(size=10,  family="Times New Roman")) +
+  # Add the line
+  geom_vline(xintercept = as.numeric(chemical_summary_df$odd_month_date[chemical_date_vline_position]), 
+             color = "dark grey",
+             linetype = "dashed")
+
+chemical_plot / rainfall_plot
+```
+
