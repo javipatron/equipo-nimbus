@@ -79,6 +79,10 @@ summary_df <- pivot_df_no3_k_rejoined %>%
 ```
 
 ```{r}
+# Define positions of vline for Hugo
+date_vline <- as.Date(c("1989-09-01"))    
+date_vline_position <- which(summary_df$odd_month_date %in% date_vline)
+
 # Plot the two chemicals of interest with colors by site
 ggplot(data = summary_df, aes(x = odd_month_date, 
                               y = means_by_month)) +
@@ -90,5 +94,9 @@ ggplot(data = summary_df, aes(x = odd_month_date,
              labeller = as_labeller(c(k = "K mg l^-1", 
                                       no3_n = "NO3-N ug l^-1"))) +
   labs(x = "Years", y = "", color = "") +
-  theme_light() 
+  theme_light() +
+  # Add the line
+  geom_vline(xintercept = as.numeric(summary_df$odd_month_date[date_vline_position]), 
+             color = "dark grey",
+             linetype = "dashed")
 ```
