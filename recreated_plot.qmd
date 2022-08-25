@@ -3,6 +3,7 @@ title: "Recreated Plot"
 format: html
 editor: visual
 ---
+
 ```{r}
 # Packages
 library(tidyverse)
@@ -52,11 +53,16 @@ summary_df <- pivot_df_no3_k %>%
 
 ```{r}
 # Plot the two chemicals of interest with colors by site
-ggplot(data = summary_df, aes(x = sample_date, y = means_by_month)) +
+ggplot(data = summary_df, aes(x = sample_date, 
+                              y = means_by_month)) +
   geom_line(aes(color = sample_id)) +
   facet_wrap(~chemicals,
              scales = "free_y",
-             ncol = 1) 
+             ncol = 1,
+             strip.position = "left", 
+                labeller = as_labeller(c(k = "K mg l^-1", 
+                                         no3_n = "NO3-N ug l^-1"))) +
+  labs(x = "Years", y = "", color = "") +
+  theme_light() 
+  
 ```
-
-
