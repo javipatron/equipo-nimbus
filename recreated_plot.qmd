@@ -78,10 +78,10 @@ ggplot(data = summary_df, aes(x = sample_date,
   geom_line(aes(color = sample_id)) +
   facet_wrap(~chemicals,
              scales = "free_y",
-              ncol = 1,
+             ncol = 1,
              strip.position = "left", 
-                labeller = as_labeller(c(k = "K mg l^-1", 
-                                         no3_n = "NO3-N ug l^-1"))) +
+             labeller = as_labeller(c(k = "K mg l^-1", 
+                                      no3_n = "NO3-N ug l^-1"))) +
   labs(x = "Years", y = "", color = "") +
   theme_light() 
 ```
