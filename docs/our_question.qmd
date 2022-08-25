@@ -5,10 +5,13 @@ editor: visual
 execute:
   warning: false
 ---
+
 ## Introduction
+
 Here we aim to answer the question: "Does rainfall correlate with change in K & NO3 at Bisley measurement sites?" This report uses three different sites at Bisley: Quebrada Cuenca 1, Quebrada Cuenca 2, and Quebrada Cuenca 3, as well as rainfall data for the region, highlighting the time when Hurricane Hugo hit in 1989.
 
 ## Load in the packages
+
 ```{r}
 library(tidyverse)
 library(here)
@@ -18,6 +21,7 @@ library(patchwork)
 ```
 
 ## Read in the four files needed to analyze the Bisley sites vs. rainfall
+
 ```{r}
 Q1 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca1-Bisley.csv")) %>%
   clean_names()
@@ -33,6 +37,7 @@ rainfall <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-da
 ```
 
 ## Combine chemistry datasets by a full join
+
 ```{r}
 joined_df <- Q1 %>%
   full_join(Q2) %>%
@@ -40,6 +45,7 @@ joined_df <- Q1 %>%
 ```
 
 ## Tidy the data and begin to make it ready for our analysis
+
 ```{r}
 # Chemistry dataframe
 pivot_df_no3_k <- joined_df %>%
@@ -57,6 +63,7 @@ rainfall_subset <- rainfall %>%
 ```
 
 ## Add a column with the level of the data as bimonthly (every two months) rather than monthly
+
 ```{r}
 # For chemistry data
 pivot_df_no3_k <- pivot_df_no3_k %>%
@@ -88,6 +95,7 @@ rainfall_subset$odd_month_date <- as.Date(rainfall_subset$odd_month_date) # Make
 ```
 
 ## Create a summary table with means by month, chemical, and site
+
 ```{r}
 # Summarize chemistry df means by month, chemical, and site
 chemical_summary_df <- pivot_df_no3_k %>%
@@ -101,6 +109,7 @@ rainfall_summary_df <- rainfall_subset %>%
 ```
 
 ## Create a plot of the two chemicals of interest (K and NO3) with colors by site with another plot containing rainfall for the same time period
+
 ```{r}
 # Define positions of vline for Hugo
 chemical_date_vline <- as.Date(c("1989-09-01"))    
@@ -148,6 +157,7 @@ combined_plot
 ```
 
 ## Save the plot to the plots folder
+
 ```{r}
 ggsave(plot = combined_plot,
        here("plots", "rainfall_and_stream_chemistry_plot.png"),
@@ -155,4 +165,3 @@ ggsave(plot = combined_plot,
        height = 8,
        dpi = 200)
 ```
-
