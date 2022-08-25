@@ -41,12 +41,32 @@ pivot_df_no3_k <- joined_df %>%
   select(sample_id, sample_date, no3_n, k) %>%
   filter(lubridate::year(sample_date) %in% 1989:1995) %>%
   mutate(sample_date = lubridate::floor_date(sample_date, "month")) %>%
-  pivot_longer(cols = c(no3_n, k), names_to = "chemicals", values_to = "amounts") 
+  pivot_longer(cols = c(no3_n, k), names_to = "chemicals", values_to = "amounts") #%>%
+  #filter(chemicals == "no3_n", chemicals == "k" & lubridate::year(sample_date) <= 1993)
+
+k_correct_dates <- pivot_df_no3_k %>%
+  filter(chemicals == "k") %>%
+  mutate(amounts = replace(amounts, lubridate::year(sample_date) >= 1993, as.numeric("NA")))
+  
+pivot_df_no3_no_k <- pivot_df_no3_k %>%
+  filter(chemicals == "no3_n")
+
+pivot_df_no3_k_rejoined <- full_join(pivot_df_no3_no_k, k_correct_dates)
+```
+
+```{r}
+pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "02-01", "01-01")
+pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "04-01", "03-01")
+pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "06-01", "05-01")
+pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "08-01", "07-01")
+pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "10-01", "09-01")
+pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "12-01", "11-01")
+pivot_df_no3_k_rejoined$sample_date <- as.Date(pivot_df_no3_k_rejoined$sample_date)
 ```
 
 ```{r}
 # Summarize means by month, chemical, and site
-summary_df <- pivot_df_no3_k %>%
+summary_df <- pivot_df_no3_k_rejoined %>%
   group_by(sample_id, sample_date, chemicals) %>%
   summarize(means_by_month = mean(amounts, na.rm = TRUE))
 ```
@@ -58,11 +78,10 @@ ggplot(data = summary_df, aes(x = sample_date,
   geom_line(aes(color = sample_id)) +
   facet_wrap(~chemicals,
              scales = "free_y",
-             ncol = 1,
+              ncol = 1,
              strip.position = "left", 
                 labeller = as_labeller(c(k = "K mg l^-1", 
                                          no3_n = "NO3-N ug l^-1"))) +
   labs(x = "Years", y = "", color = "") +
   theme_light() 
-  
 ```
