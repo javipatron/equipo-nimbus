@@ -32,7 +32,7 @@ rainfall <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-da
   clean_names()
 ```
 
-## Combine datasets by a full join
+## Combine chemistry datasets by a full join
 ```{r}
 joined_df <- Q1 %>%
   full_join(Q2) %>%
