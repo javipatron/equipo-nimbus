@@ -2,6 +2,8 @@
 title: "Our question!"
 format: html
 editor: visual
+execute:
+  warning: false
 ---
 ## Introduction
 Here we aim to answer the question: "Does increased rainfall correlate with change in K & NO3 at Bisley measurement sites?" This report uses three different sites at Bisley: Quebrada Cuenca 1, Quebrada Cuenca 2, and Quebrada Cuenca 3, as well as rainfall data for the region, highlighting the time when Hurricane Hugo hit in 1989.
