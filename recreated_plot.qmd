@@ -87,7 +87,7 @@ date_vline <- as.Date(c("1989-09-01"))
 date_vline_position <- which(summary_df$odd_month_date %in% date_vline)
 
 # Create the plot
-ggplot(data = summary_df, aes(x = odd_month_date, 
+recreated_plot <- ggplot(data = summary_df, aes(x = odd_month_date, 
                               y = means_by_month)) +
   geom_line(aes(color = sample_id)) +
   facet_wrap(~chemicals,
@@ -105,4 +105,15 @@ ggplot(data = summary_df, aes(x = odd_month_date,
   theme(panel.grid.minor.x=element_blank(),
         panel.grid.major.x=element_blank(), # Get rid of vertical grid lines 
         text=element_text(size=10,  family="Times New Roman")) # Change text size and font
+
+recreated_plot
+```
+
+## Save the plot to the plots folder
+```{r}
+ggsave(plot = recreated_plot,
+       here("plots", "recreated_stream_chemistry_plot.png"),
+       width = 8,
+       height = 8,
+       dpi = 200)
 ```

@@ -122,13 +122,12 @@ chemical_plot <- ggplot(data = chemical_summary_df, aes(x = odd_month_date,
   scale_color_manual(values = c("darkslategray3", "darkslategray4", "darkslategray")) +
   labs(x = "", y = "Bimonthly Chemical Means", color = "") +
   theme_light() +
-  theme(panel.grid.minor.x=element_blank(),
-        panel.grid.major.x=element_blank(), #get rid of vertical grid lines 
-        text=element_text(size=10,  family="Times New Roman")) +
-  # Add the line
   geom_vline(xintercept = as.numeric(chemical_summary_df$odd_month_date[chemical_date_vline_position]), 
              color = "dark grey",
-             linetype = "dashed")
+             linetype = "dashed") + # Add the line
+  theme(panel.grid.minor.x=element_blank(),
+        panel.grid.major.x=element_blank(), # Get rid of vertical grid lines 
+        text=element_text(size=10,  family="Times New Roman")) 
 
 # Plot rainfall
 rainfall_plot <- ggplot(data = rainfall_summary_df, aes(x = odd_month_date, 
