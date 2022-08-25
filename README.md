@@ -6,7 +6,7 @@
 
 Here we plot stream chemistry and rainfall in the Luquillo Long Term Ecological Research site before and after Hurricane Hugo struck Puerto Rico in 1989. This project was created as an assignment for EDS 214 at UC Santa Barbara taught by Dr. Julien Brun.
 
-(Sample photo)
+![Stream chemistry and rainfall output](plots/rainfall_and_stream_chemistry_plot.png)
 
 ## Installation
 
@@ -32,4 +32,22 @@ Stream chemistry data were collected weekly within the [Luquillo Long Term Ecolo
 
 Rainfall data were collected weekly within the [Luquillo Long Term Ecological Research](https://lternet.edu/site/luquillo-lter/) site and made available by Heartsill-Scalley, Tamara.
 
-## Contribute 
+## Contribute
+
+This project is not actively being maintained outside of the course EDS 214 at UCSB. However, for bugs spotted in this code, please submit an issue to the [GitHub repository](https://github.com/javipatron/equipo-nimbus).
+
+## References
+
+**Publication:**
+
+Schaefer, D., McDowell, W., Scatena, F., & Asbury, C. (2000). Effects of hurricane disturbance on stream water concentrations and fluxes in eight tropical forest watersheds of the Luquillo Experimental Forest, Puerto Rico. Journal of Tropical Ecology, 16(2), 189-207. [**doi:10.1017/S0266467400001358**](doi:10.1017/S0266467400001358)
+
+**Data References:**
+
+Chemistry of stream water from the Luquillo Mountains
+
+-   McDowell, W. 2022. Chemistry of stream water from the Luquillo Mountains ver 4923058. Environmental Data Initiative. <https://doi.org/10.6073/pasta/1dd1a59a7e6fbe95fdf8736477d81b83> (Accessed 2022-08-25).
+
+Bisley rainfall and throughfall, and chemistry of rainfall and throughfall
+
+-   Heartsill-Scalley, T. 2017. Bisley rainfall and throughfall, and chemistry of rainfall and throughfall ver 1213961. Environmental Data Initiative. <https://doi.org/10.6073/pasta/fe51799a303a8504c0562426fbc850c6> (Accessed 2022-08-25).
