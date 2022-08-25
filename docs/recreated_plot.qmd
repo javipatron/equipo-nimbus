@@ -1,14 +1,17 @@
 ---
-title: "Recreated Plot"
+title: "Our recreated plot!"
 format: html
 editor: visual
 execute:
   warning: false
 ---
+
 ## Introduction
+
 Here we aim to recreate a previously-made plot of stream chemistry data related to four different sites in Puerto Rico (Quebrada Cuenca 1 - Bisley, Quebrada Cuenca 2 - Bisley, Quebrada Cuenca 3 - Bisley, and Rio Mameyes Puente Roto), highlighting the time when Hurricane Hugo hit in 1989.
 
 ## Load in the packages
+
 ```{r}
 library(tidyverse)
 library(ggplot2)
@@ -18,6 +21,7 @@ library(lubridate)
 ```
 
 ## Read in the four files needed to recreate the plot, cleaning the names for each one
+
 ```{r}
 Q1 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca1-Bisley.csv")) %>%
   clean_names()
@@ -32,7 +36,8 @@ MPR <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", 
   clean_names()
 ```
 
-## Combine datasets by a full join 
+## Combine datasets by a full join
+
 ```{r}
 joined_df <- Q1 %>% # They share all of the same columns, so columns not specified
   full_join(Q2) %>%
@@ -41,6 +46,7 @@ joined_df <- Q1 %>% # They share all of the same columns, so columns not specifi
 ```
 
 ## Tidy the data and begin to make it ready for our analysis
+
 ```{r}
 pivot_df_no3_k <- joined_df %>%
   select(sample_id, sample_date, no3_n, k) %>% # Select only necessary columns
@@ -59,6 +65,7 @@ pivot_df_no3_k_rejoined <- full_join(pivot_df_no3_no_k, k_correct_dates) # Combi
 ```
 
 ## Add a column with the level of the data as bimonthly (every two months) rather than monthly
+
 ```{r}
 pivot_df_no3_k_rejoined <- pivot_df_no3_k_rejoined %>%
   mutate(odd_month_date = month_date, .after = month_date) # Create a copy of the month column which will be filled with bimonthly dates
@@ -75,19 +82,22 @@ pivot_df_no3_k_rejoined$odd_month_date <- as.Date(pivot_df_no3_k_rejoined$odd_mo
 ```
 
 ## Create a summary table with means by month, chemical, and site
+
 ```{r}
 summary_df <- pivot_df_no3_k_rejoined %>%
   group_by(sample_id, odd_month_date, chemicals) %>%
   summarize(means_by_month = mean(amounts, na.rm = TRUE))
 ```
+
 ## Create a plot of the two chemicals of interest (K and NO3) with colors by site
+
 ```{r}
 # Define positions of vline for Hugo
 date_vline <- as.Date(c("1989-09-01"))    
 date_vline_position <- which(summary_df$odd_month_date %in% date_vline)
 
 # Create the plot
-ggplot(data = summary_df, aes(x = odd_month_date, 
+recreated_plot <- ggplot(data = summary_df, aes(x = odd_month_date, 
                               y = means_by_month)) +
   geom_line(aes(color = sample_id)) +
   facet_wrap(~chemicals,
@@ -97,12 +107,25 @@ ggplot(data = summary_df, aes(x = odd_month_date,
              labeller = as_labeller(c(k = "K mg l^-1", 
                                       no3_n = "NO3-N ug l^-1"))) +
   scale_color_manual(values = c("darkseagreen3", "bisque3", "darkgreen", "deepskyblue3")) +
-  labs(x = "Years", y = "Bimonthly Chemical Means", color = "") +
+  labs(title = "Bimonthly Chemical Means by Year", x = "Years", y = "Bimonthly Chemical Means", color = "") +
   theme_light() +
   geom_vline(xintercept = as.numeric(summary_df$odd_month_date[date_vline_position]), 
              color = "dark grey",
              linetype = "dashed") + # Add the line
-  theme(panel.grid.minor.x=element_blank(),
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        panel.grid.minor.x=element_blank(),
         panel.grid.major.x=element_blank(), # Get rid of vertical grid lines 
         text=element_text(size=10,  family="Times New Roman")) # Change text size and font
+
+recreated_plot
+```
+
+## Save the plot to the plots folder
+
+```{r}
+ggsave(plot = recreated_plot,
+       here("plots", "recreated_stream_chemistry_plot.png"),
+       width = 8,
+       height = 8,
+       dpi = 200)
 ```
