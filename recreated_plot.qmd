@@ -5,7 +5,7 @@ editor: visual
 ---
 
 ```{r}
-# Packages
+# Load in packages
 library(tidyverse)
 library(here)
 library(janitor)
@@ -13,7 +13,7 @@ library(lubridate)
 ```
 
 ```{r}
-# Read in the four files needed to recreate the plot
+# Read in the four files needed to recreate the plot, cleaning the names for each one
 Q1 <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-data", "QuebradaCuenca1-Bisley.csv")) %>%
   clean_names()
 
@@ -38,42 +38,49 @@ joined_df <- Q1 %>%
 ```{r}
 # Tidy the data and begin to make it ready for our analysis
 pivot_df_no3_k <- joined_df %>%
-  select(sample_id, sample_date, no3_n, k) %>%
-  filter(lubridate::year(sample_date) %in% 1989:1995) %>%
-  mutate(sample_date = lubridate::floor_date(sample_date, "month")) %>%
-  pivot_longer(cols = c(no3_n, k), names_to = "chemicals", values_to = "amounts") #%>%
-  #filter(chemicals == "no3_n", chemicals == "k" & lubridate::year(sample_date) <= 1993)
+  select(sample_id, sample_date, no3_n, k) %>% # Select only necessary columns
+  filter(lubridate::year(sample_date) %in% 1989:1995) %>% # Only have data from 1989-1995
+  mutate(month_date = lubridate::floor_date(sample_date, "month")) %>% # Make data from the day level to the month level
+  pivot_longer(cols = c(no3_n, k), names_to = "chemicals", values_to = "amounts") # Make the two chemical names in a column and values in another
 
 k_correct_dates <- pivot_df_no3_k %>%
-  filter(chemicals == "k") %>%
-  mutate(amounts = replace(amounts, lubridate::year(sample_date) >= 1993, as.numeric("NA")))
+  filter(chemicals == "k") %>% # Select only k
+  mutate(amounts = replace(amounts, lubridate::year(sample_date) >= 1993, as.numeric("NA"))) # Make anything after 1993 NAs so no values plot, to roughly match the plot we are recreating
   
 pivot_df_no3_no_k <- pivot_df_no3_k %>%
-  filter(chemicals == "no3_n")
+  filter(chemicals == "no3_n") # Select only no3
 
-pivot_df_no3_k_rejoined <- full_join(pivot_df_no3_no_k, k_correct_dates)
+pivot_df_no3_k_rejoined <- full_join(pivot_df_no3_no_k, k_correct_dates) # Combine refined k data with the no3 data
 ```
 
 ```{r}
-pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "02-01", "01-01")
-pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "04-01", "03-01")
-pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "06-01", "05-01")
-pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "08-01", "07-01")
-pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "10-01", "09-01")
-pivot_df_no3_k_rejoined$sample_date <- str_replace_all(pivot_df_no3_k_rejoined$sample_date, "12-01", "11-01")
-pivot_df_no3_k_rejoined$sample_date <- as.Date(pivot_df_no3_k_rejoined$sample_date)
+# Add a column with the level of the data as bimonthly rather than monthly
+
+pivot_df_no3_k_rejoined <- pivot_df_no3_k_rejoined %>%
+  mutate(odd_month_date = month_date) %>% # Create a copy of the month column which will be filled with bimonthly dates
+  relocate(odd_month_date, .after = month_date)
+
+# Converting to merge even months into odd months
+pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "02-01", "01-01")
+pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "04-01", "03-01")
+pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "06-01", "05-01")
+pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "08-01", "07-01")
+pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "10-01", "09-01")
+pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "12-01", "11-01")
+
+pivot_df_no3_k_rejoined$odd_month_date <- as.Date(pivot_df_no3_k_rejoined$odd_month_date) # Make it a Date variable again
 ```
 
 ```{r}
 # Summarize means by month, chemical, and site
 summary_df <- pivot_df_no3_k_rejoined %>%
-  group_by(sample_id, sample_date, chemicals) %>%
+  group_by(sample_id, odd_month_date, chemicals) %>%
   summarize(means_by_month = mean(amounts, na.rm = TRUE))
 ```
 
 ```{r}
 # Plot the two chemicals of interest with colors by site
-ggplot(data = summary_df, aes(x = sample_date, 
+ggplot(data = summary_df, aes(x = odd_month_date, 
                               y = means_by_month)) +
   geom_line(aes(color = sample_id)) +
   facet_wrap(~chemicals,
