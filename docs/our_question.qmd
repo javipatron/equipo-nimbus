@@ -146,6 +146,7 @@ rainfall_plot <- ggplot(data = rainfall_summary_df, aes(x = odd_month_date,
 combined_plot <- chemical_plot / rainfall_plot
 combined_plot
 ```
+#### There is no clear trend of correlation between the chemical concentrations and rainfall, while we can see some moments of an inverse relationship (right after Hurricane Hugo; a bit after 1992).
 
 ## Save the plot to the plots folder
 
