@@ -110,6 +110,7 @@ chemical_plot <- ggplot(data = chemical_summary_df, aes(x = odd_month_date,
                                       no3_n = "NO3-N ug l^-1"))) +
   scale_color_manual(values = c("darkslategray3", "darkslategray4", "darkslategray")) +
   labs(title = "Bimonthly chemical vs. rainfall means for Bisley watershed sites in Puerto Rico, 1989-1994",
+       subtitle = "Vertical lines highlighting when Hurricane Hugo hit",
        x = "", 
        y = "Bimonthly Chemical Means", 
        color = "") +

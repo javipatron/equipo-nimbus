@@ -98,9 +98,11 @@ recreated_plot <- ggplot(data = summary_df, aes(x = odd_month_date,
              labeller = as_labeller(c(k = "K mg l^-1", 
                                       no3_n = "NO3-N ug l^-1"))) +
   scale_color_manual(values = c("darkseagreen3", "bisque3", "darkgreen", "deepskyblue3")) +
-  labs(title = "Bimonthly chemical means for four watershed sites in Puerto Rico, circa the early 1990s", 
+  labs(title = "Bimonthly chemical means for four watershed sites in Puerto Rico, circa the early 1990s",
+       subtitle = "Vertical lines highlighting when Hurricane Hugo hit",
        x = "Years", 
-       y = "Bimonthly Chemical Means", color = "") + # add something about puerto rico to title
+       y = "Bimonthly Chemical Means", 
+       color = "") + # add something about puerto rico to title
   theme_light() +
   geom_vline(xintercept = as.numeric(summary_df$odd_month_date[date_vline_position]), 
              color = "dark grey",
