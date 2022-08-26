@@ -70,7 +70,8 @@ rainfall_subset <- rainfall %>%
 bisley_pivot_df_no3_k <- convert_monthly_to_bimonthly(df = bisley_pivot_df_no3_k, month_column = month_date)
 
 # For rainfall data
-rainfall_subset <- convert_monthly_to_bimonthly(df = rainfall_subset, month_column = month_date)
+rainfall_subset <- convert_monthly_to_bimonthly(df = rainfall_subset, 
+                                                month_column = month_date)
 ```
 
 ## Create a summary table with means by month, chemical, and site
@@ -108,7 +109,10 @@ chemical_plot <- ggplot(data = chemical_summary_df, aes(x = odd_month_date,
              labeller = as_labeller(c(k = "K mg l^-1", 
                                       no3_n = "NO3-N ug l^-1"))) +
   scale_color_manual(values = c("darkslategray3", "darkslategray4", "darkslategray")) +
-  labs(x = "", y = "Bimonthly Chemical Means", color = "") +
+  labs(title = "Bimonthly chemical vs. rainfall means for Bisley watershed sites in Puerto Rico, 1989-1994",
+       x = "", 
+       y = "Bimonthly Chemical Means", 
+       color = "") +
   theme_light() +
   geom_vline(xintercept = as.numeric(chemical_summary_df$odd_month_date[chemical_date_vline_position]), 
              color = "dark grey",
@@ -121,7 +125,8 @@ chemical_plot <- ggplot(data = chemical_summary_df, aes(x = odd_month_date,
 rainfall_plot <- ggplot(data = rainfall_summary_df, aes(x = odd_month_date, 
                               y = rainfall_means_by_month)) +
   geom_line(color = "darkblue") +
-  labs(x = "Years", y = "Bimonthly Rainfall Means (mm)") +
+  labs(x = "Years", 
+       y = "Bimonthly Rainfall Means (mm)") +
   theme_light() + 
   geom_vline(xintercept = as.numeric(chemical_summary_df$odd_month_date[chemical_date_vline_position]), 
              color = "dark grey",

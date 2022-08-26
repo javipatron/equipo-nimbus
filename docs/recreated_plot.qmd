@@ -68,7 +68,8 @@ pivot_df_no3_k_rejoined <- full_join(pivot_df_no3_no_k, k_correct_dates) # Combi
 ## Add a column with the level of the data as bimonthly (every two months) rather than monthly
 
 ```{r}
-pivot_df_no3_k_rejoined <- convert_monthly_to_bimonthly(df = pivot_df_no3_k_rejoined, month_column = month_date) 
+pivot_df_no3_k_rejoined <- convert_monthly_to_bimonthly(df = pivot_df_no3_k_rejoined, 
+                                                        month_column = month_date) 
 ```
 
 ## Create a summary table with means by month, chemical, and site
@@ -97,7 +98,9 @@ recreated_plot <- ggplot(data = summary_df, aes(x = odd_month_date,
              labeller = as_labeller(c(k = "K mg l^-1", 
                                       no3_n = "NO3-N ug l^-1"))) +
   scale_color_manual(values = c("darkseagreen3", "bisque3", "darkgreen", "deepskyblue3")) +
-  labs(title = "Bimonthly Chemical Means by Year", x = "Years", y = "Bimonthly Chemical Means", color = "") + # add something about puerto rico to title
+  labs(title = "Bimonthly chemical means for four watershed sites in Puerto Rico, circa the early 1990s", 
+       x = "Years", 
+       y = "Bimonthly Chemical Means", color = "") + # add something about puerto rico to title
   theme_light() +
   geom_vline(xintercept = as.numeric(summary_df$odd_month_date[date_vline_position]), 
              color = "dark grey",
