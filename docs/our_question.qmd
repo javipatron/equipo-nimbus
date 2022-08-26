@@ -18,6 +18,7 @@ library(here)
 library(janitor)
 library(lubridate)
 library(patchwork)
+source(here("R", "convert_monthly_to_bimonthly.R"))
 ```
 
 ## Read in the four files needed to analyze the Bisley sites vs. rainfall
@@ -39,7 +40,7 @@ rainfall <- read_csv(here("/courses", "EDS214", "equipo-nimbus", "data", "raw-da
 ## Combine chemistry datasets by a full join
 
 ```{r}
-joined_df <- Q1 %>%
+bisley_sites_joined_df <- Q1 %>%
   full_join(Q2) %>%
   full_join(Q3)
 ```
@@ -48,7 +49,7 @@ joined_df <- Q1 %>%
 
 ```{r}
 # Chemistry dataframe
-pivot_df_no3_k <- joined_df %>%
+bisley_pivot_df_no3_k <- bisley_sites_joined_df %>%
   select(sample_id, sample_date, no3_n, k) %>% # Select only necessary columns
   filter(lubridate::year(sample_date) %in% 1989:1994) %>% # Only have data from 1989-1994
   mutate(month_date = lubridate::floor_date(sample_date, "month")) %>% # Make data from the day level to the month level
@@ -66,39 +67,17 @@ rainfall_subset <- rainfall %>%
 
 ```{r}
 # For chemistry data
-pivot_df_no3_k <- pivot_df_no3_k %>%
-  mutate(odd_month_date = month_date, .after = month_date) # Create a copy of the month column which will be filled with bimonthly dates
-
-# Converting to merge even months into odd months
-pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "02-01", "01-01")
-pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "04-01", "03-01")
-pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "06-01", "05-01")
-pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "08-01", "07-01")
-pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "10-01", "09-01")
-pivot_df_no3_k$odd_month_date <- str_replace_all(pivot_df_no3_k$odd_month_date, "12-01", "11-01")
-
-pivot_df_no3_k$odd_month_date <- as.Date(pivot_df_no3_k$odd_month_date) # Make it a Date variable again
+bisley_pivot_df_no3_k <- convert_monthly_to_bimonthly(df = bisley_pivot_df_no3_k, month_column = month_date)
 
 # For rainfall data
-rainfall_subset <- rainfall_subset %>%
-  mutate(odd_month_date = month_date, .after = month_date) # Create a copy of the month column which will be filled with bimonthly dates
-
-# Converting to merge even months into odd months
-rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "02-01", "01-01")
-rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "04-01", "03-01")
-rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "06-01", "05-01")
-rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "08-01", "07-01")
-rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "10-01", "09-01")
-rainfall_subset$odd_month_date <- str_replace_all(rainfall_subset$odd_month_date, "12-01", "11-01")
-
-rainfall_subset$odd_month_date <- as.Date(rainfall_subset$odd_month_date) # Make it a Date variable again
+rainfall_subset <- convert_monthly_to_bimonthly(df = rainfall_subset, month_column = month_date)
 ```
 
 ## Create a summary table with means by month, chemical, and site
 
 ```{r}
 # Summarize chemistry df means by month, chemical, and site
-chemical_summary_df <- pivot_df_no3_k %>%
+chemical_summary_df <- bisley_pivot_df_no3_k %>%
   group_by(sample_id, odd_month_date, chemicals) %>%
   summarize(chemical_means_by_month = mean(amounts, na.rm = TRUE))
 

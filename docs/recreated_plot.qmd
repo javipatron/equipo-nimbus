@@ -18,6 +18,7 @@ library(ggplot2)
 library(here)
 library(janitor)
 library(lubridate)
+source(here("R", "convert_monthly_to_bimonthly.R"))
 ```
 
 ## Read in the four files needed to recreate the plot, cleaning the names for each one
@@ -67,18 +68,7 @@ pivot_df_no3_k_rejoined <- full_join(pivot_df_no3_no_k, k_correct_dates) # Combi
 ## Add a column with the level of the data as bimonthly (every two months) rather than monthly
 
 ```{r}
-pivot_df_no3_k_rejoined <- pivot_df_no3_k_rejoined %>%
-  mutate(odd_month_date = month_date, .after = month_date) # Create a copy of the month column which will be filled with bimonthly dates
-
-# Converting to merge even months into odd months
-pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "02-01", "01-01")
-pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "04-01", "03-01")
-pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "06-01", "05-01")
-pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "08-01", "07-01")
-pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "10-01", "09-01")
-pivot_df_no3_k_rejoined$odd_month_date <- str_replace_all(pivot_df_no3_k_rejoined$odd_month_date, "12-01", "11-01")
-
-pivot_df_no3_k_rejoined$odd_month_date <- as.Date(pivot_df_no3_k_rejoined$odd_month_date) # Make it a Date variable again
+pivot_df_no3_k_rejoined <- convert_monthly_to_bimonthly(df = pivot_df_no3_k_rejoined, month_column = month_date) 
 ```
 
 ## Create a summary table with means by month, chemical, and site
@@ -107,7 +97,7 @@ recreated_plot <- ggplot(data = summary_df, aes(x = odd_month_date,
              labeller = as_labeller(c(k = "K mg l^-1", 
                                       no3_n = "NO3-N ug l^-1"))) +
   scale_color_manual(values = c("darkseagreen3", "bisque3", "darkgreen", "deepskyblue3")) +
-  labs(title = "Bimonthly Chemical Means by Year", x = "Years", y = "Bimonthly Chemical Means", color = "") +
+  labs(title = "Bimonthly Chemical Means by Year", x = "Years", y = "Bimonthly Chemical Means", color = "") + # add something about puerto rico to title
   theme_light() +
   geom_vline(xintercept = as.numeric(summary_df$odd_month_date[date_vline_position]), 
              color = "dark grey",
