@@ -1,6 +1,6 @@
-![](plots/banner.jpg)
+![](banner.jpg)
 
-# Rainfall and Stream Chemistry Impacts of Hurricane Hugo 
+# Rainfall and Stream Chemistry Impacts of Hurricane Hugo
 
 Here we plot stream chemistry and rainfall in the Luquillo Long Term Ecological Research site before and after Hurricane Hugo struck Puerto Rico in 1989. This project was created as an assignment for EDS 214 at UC Santa Barbara taught by Dr. Julien Brun. This project was completed by: Carlo Broderick, Erika Egg, Javier Patron, & Elke Windschitl.
 
