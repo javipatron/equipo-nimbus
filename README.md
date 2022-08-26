@@ -1,6 +1,6 @@
 <!-- Add banner here -->
 
-![](https://i1.pickpik.com/photos/683/227/758/tropical-cyclone-hurricane-isabel-aerial-view-thumb.jpg)
+![](plots/banner.jpg)
 
 # Rainfall and Stream Chemistry Impacts of Hurricane Hugo
 
